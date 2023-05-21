@@ -25,11 +25,11 @@ dependencies = [
 Homepage = "https://github.com/sheldygg/tiktok-signature"
 
 [tool.hatch.version]
-path = "tiktok-signature/__init__.py"
+path = "tiktok_signature/__init__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "/tiktok-signature",
+    "/tiktok_signature",
 ]
 [tool.isort]
 profile = "black"
