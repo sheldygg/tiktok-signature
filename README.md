@@ -1,8 +1,10 @@
 # Tiktok Signature
 
+```pip install tiktok-signature```
+
 **Server**
 
-```python
+```
 python server.py
 ```
 
