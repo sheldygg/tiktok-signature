@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from playwright.async_api._generated import Page, Playwright, Request, Route
+from .scripts import signer, bogus, webmssdk
 
 
 class Signer:
@@ -59,9 +60,8 @@ class Signer:
 
         await self.page.route("**/*", route_handler)
         await self.page.goto(url=self.default_url, wait_until="networkidle")
-        load_scripts = ["signer.js", "webmssdk.js", "xbogus.js"]
-        for script in load_scripts:
-            await self.page.add_script_tag(path=f"./javascript/{script}")
+        for script in [signer, bogus, webmssdk]:
+            await self.page.add_script_tag(content=script)
         await self.page.evaluate(
             """() => {
             window.generateSignature = function generateSignature(url) {
@@ -113,16 +113,16 @@ class Signer:
         _signature = await self.page.evaluate(f'generateSignature("{new_url}")')
         signed_url = new_url + "&_signature" + _signature
         query_string = urlparse(signed_url).query
-        bogus = await self.page.evaluate(
+        generated_bogus = await self.page.evaluate(
             f'generateBogus("{query_string}","{self.user_agent}")'
         )
-        signed_url += "&X-Bogus=" + bogus
+        signed_url += "&X-Bogus=" + generated_bogus
         return {
             "signature": _signature,
             "verify_fp": verify_fp,
             "signed_url": signed_url,
             "x-tt-params": self.xttparams(query_string),
-            "x-bogus": bogus,
+            "x-bogus": generated_bogus,
             "navigator": await self.navigator(),
         }
 
