@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from aiohttp.web import Application, AppRunner, TCPSite, json_response
 from aiohttp.web_request import Request
@@ -16,6 +17,9 @@ async def post_request(request: Request):
     post_data = await request.post()
     url = post_data.get("url")
     return json_response(await signer.sign(url))
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 async def main():
