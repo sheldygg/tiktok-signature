@@ -1,9 +1,10 @@
 import asyncio
 
-from aiohttp.web import Application, TCPSite, AppRunner, json_response
+from aiohttp.web import Application, AppRunner, TCPSite, json_response
 from aiohttp.web_request import Request
 from playwright.async_api import async_playwright
-from signature import Signer
+
+from tiktok_signature import Signer
 
 
 async def get_request(request: Request):
@@ -13,7 +14,8 @@ async def get_request(request: Request):
 async def post_request(request: Request):
     signer: Signer = request.app["signer"]
     post_data = await request.post()
-    return json_response(await signer.sign(post_data.get("url")))
+    url = post_data.get("url")
+    return json_response(await signer.sign(url))
 
 
 async def main():
@@ -23,15 +25,11 @@ async def main():
         await signer.init()
         app = Application()
         app["signer"] = signer
-        app.router.add_post(
-            path="/signature", handler=post_request
-        )
-        app.router.add_get(
-            path="", handler=get_request
-        )
+        app.router.add_post(path="/signature", handler=post_request)
+        app.router.add_get(path="", handler=get_request)
         runner = AppRunner(app)
         await runner.setup()
-        site = TCPSite(runner, host="127.0.0.1", port=8080)
+        site = TCPSite(runner, host="127.0.0.1", port=8002)
         await site.start()
         await asyncio.Event().wait()
     finally:
