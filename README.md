@@ -1,5 +1,4 @@
 # Tiktok Signature
-****
 
 **Server**
 
