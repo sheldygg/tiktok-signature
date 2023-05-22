@@ -19,6 +19,7 @@ dependencies = [
     "playwright",
     "pycryptodome"
 ]
+[project.optional-dependencies]
 server = [
     "aiohttp"
 ]
