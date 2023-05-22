@@ -56,7 +56,7 @@ You can build image yourself
 ```
 docker build . -t tiktok-signature
 ```
-or use already ready
+Or start immediately with the second command and use the ready image
 ```
 docker run --name=tiktok-signature --restart=always -p 8002:8002 -e port=8002 sheldygg/tiktok-signature
 ```
