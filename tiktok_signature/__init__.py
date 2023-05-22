@@ -1,3 +1,3 @@
 from .signature import Signer
 
-__version__ = "1"
+__version__ = "1.1"
