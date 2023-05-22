@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
-from playwright.async_api._generated import Page, Playwright, Request, Route
+from playwright.async_api import Page, Playwright, Request, Route
 from .scripts import signer, bogus, webmssdk
 
 
