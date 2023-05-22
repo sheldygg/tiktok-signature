@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tiktok-signature"
+dynamic = ["version"]
+description = "Some tool"
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "sheldy" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    "playwright",
+    "pycryptodome"
+]
+server = [
+    "aiohttp"
+]
+
+[project.urls]
+Homepage = "https://github.com/sheldygg/tiktok-signature"
+
+[tool.hatch.version]
+path = "tiktok_signature/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/tiktok_signature",
+]
+[tool.isort]
+profile = "black"
