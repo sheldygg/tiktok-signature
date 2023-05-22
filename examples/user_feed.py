@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from tiktok_signature import Signer
 from playwright.async_api import async_playwright
 
+# pip install aiotiktok
 from aiotiktok import Client
 from aiotiktok.constants import static_user_videos_url, static_unsigned_user_videos, default_user_videos_params
 
