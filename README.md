@@ -22,14 +22,11 @@ class Settings(BaseSettings):
 
 
 async def main():
-    playwright = await async_playwright().start()
     settings = Settings()
-    try:
+    async with async_playwright() as playwright:
         server = await make_server(playwright=playwright, host=settings.host, port=settings.port)
         await server.start()
         await asyncio.Event().wait()
-    finally:
-        await playwright.stop()
 
 asyncio.run(main())
 
@@ -44,13 +41,10 @@ from tiktok_signature import Signer
 from playwright.async_api import async_playwright
 
 async def main():
-    playwright = await async_playwright().start()
-    try:
+    async with async_playwright() as playwright:
         signer = Signer(playwright=playwright)
         await signer.init()
         await signer.sign("url")
-    finally:
-        await playwright.stop()
         
 asyncio.run(main())
 
@@ -58,4 +52,11 @@ asyncio.run(main())
 
 **Docker**
 
-Soon...
+You can build image yourself
+```
+docker build . -t tiktok-signature
+```
+or use already ready
+```
+docker run --name=tiktok-signature --restart=always -p 8002:8002 -e port=8002 sheldygg/tiktok-signature
+```
