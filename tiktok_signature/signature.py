@@ -5,7 +5,8 @@ from urllib.parse import urlparse
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from playwright.async_api import Page, Playwright, Request, Route
-from .scripts import signer, bogus, webmssdk
+
+from .scripts import bogus, navigator, signature_functions, signer, webmssdk
 
 
 class Signer:
@@ -36,7 +37,7 @@ class Signer:
             "headless": headless,
             "args": self.args,
         }
-        self.page: Page | None = None
+        self._page: Page | None = None
 
     async def init(self):
         browser = await self.playwright.chromium.launch(**self.options)
@@ -50,7 +51,7 @@ class Signer:
         emulate_template["viewport"]["width"] = self.get_random_int(320, 1920)
         emulate_template["viewport"]["height"] = self.get_random_int(320, 1920)
         context = await browser.new_context(bypass_csp=True, **emulate_template)
-        self.page = await context.new_page()
+        self._page = await context.new_page()
 
         async def route_handler(route: Route, request: Request):
             if request.resource_type == "script":
@@ -58,41 +59,14 @@ class Signer:
             else:
                 await route.continue_()
 
-        await self.page.route("**/*", route_handler)
-        await self.page.goto(url=self.default_url, wait_until="networkidle")
+        await self._page.route("**/*", route_handler)
+        await self._page.goto(url=self.default_url, wait_until="networkidle")
         for script in [signer, bogus, webmssdk]:
-            await self.page.add_script_tag(content=script)
-        await self.page.evaluate(
-            """() => {
-            window.generateSignature = function generateSignature(url) {
-                if (typeof window.byted_acrawler.sign !== "function") {
-                    throw "No signature function found";
-                }
-                return window.byted_acrawler.sign({ url: url });
-            };
-            window.customGenerateBogus = function(params) {
-                if (typeof window.generateBogus !== "function") {
-                    throw "No X-Bogus function found";
-                }
-                return window.generateBogus(params);
-            };
-            return this;
-        }"""
-        )
+            await self._page.add_script_tag(content=script)
+        await self._page.evaluate(signature_functions)
 
     async def navigator(self):
-        return await self.page.evaluate(
-            """() => {
-            return {
-                deviceScaleFactor: window.devicePixelRatio,
-                user_agent: window.navigator.userAgent,
-                browser_language: window.navigator.language,
-                browser_platform: window.navigator.platform,
-                browser_name: window.navigator.appCodeName,
-                browser_version: window.navigator.appVersion,
-            };
-        }"""
-        )
+        return await self._page.evaluate(navigator)
 
     @staticmethod
     def generatevfp():
@@ -108,12 +82,14 @@ class Signer:
         return min_val + random.randint(0, diff - 1)
 
     async def sign(self, link: str):
+        if not self._page:
+            raise RuntimeError("You must call init method before start.")
         verify_fp = self.generatevfp()
         new_url = f"{link}&verifyFp={verify_fp}"
-        _signature = await self.page.evaluate(f'generateSignature("{new_url}")')
+        _signature = await self._page.evaluate(f'generateSignature("{new_url}")')
         signed_url = new_url + "&_signature" + _signature
         query_string = urlparse(signed_url).query
-        generated_bogus = await self.page.evaluate(
+        generated_bogus = await self._page.evaluate(
             f'generateBogus("{query_string}","{self.user_agent}")'
         )
         signed_url += "&X-Bogus=" + generated_bogus

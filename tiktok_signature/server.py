@@ -15,7 +15,7 @@ async def post_request(request: Request):
     signer: Signer = request.app["signer"]
     post_data = await request.post()
     url = post_data.get("url")
-    return json_response(await signer.sign(url))
+    return json_response(await signer.sign(str(url)))
 
 
 async def make_server(playwright, host: str, port: int):
@@ -37,12 +37,14 @@ async def start_server(playwright, host: str, port: int):
         await server.start()
         await asyncio.Event().wait()
 
+
 if __name__ == "__main__":
     from playwright.async_api import async_playwright
+
     asyncio.run(
         start_server(
             playwright=async_playwright,
-            host=os.getenv("host"),
-            port=int(os.getenv("port"))
+            host=os.getenv("host", "127.0.0.1"),
+            port=int(os.getenv("port", 8002)),
         )
     )
