@@ -11,38 +11,29 @@ tiktok-signature
     :alt: Downloads
 
 Server
-========
+======
 
 .. code-block:: python
 
-   import asyncio
+    import asyncio
 
-   from playwright.async_api import async_playwright
-   from pydantic import BaseSettings
-   from tiktok_signature.server import make_server
-
-
-   class Settings(BaseSettings):
-       host: str
-       port: int
-
-       class Config:
-           env_file = ".env"
-           env_file_encoding = "utf-8"
+    from playwright.async_api import async_playwright
+    from tiktok_signature.server import make_server
 
 
-   async def main():
-       settings = Settings()
-       async with async_playwright() as playwright:
-           server = await make_server(playwright=playwright, host=settings.host, port=settings.port)
-           await server.start()
-           await asyncio.Event().wait()
+    async def main():
+        async with async_playwright() as playwright:
+            server = await make_server(playwright=playwright, host="127.0.0.1", port=8002)
+            await server.start()
+            await asyncio.Event().wait()
 
-   asyncio.run(main())
+
+    asyncio.run(main())
+
 
 
 As package
-=====
+==========
 .. code-block:: python
 
     import asyncio
@@ -60,7 +51,7 @@ As package
     asyncio.run(main())
 
 Docker
-====
+======
 You can build image yourself
 
 .. code-block:: rst
